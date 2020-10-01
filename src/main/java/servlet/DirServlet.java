@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @WebServlet("/")
 public class DirServlet extends HttpServlet {
@@ -21,6 +23,7 @@ public class DirServlet extends HttpServlet {
 
         printDirectory(req, path == null ? defaultFolder : path);
 
+        req.setAttribute("now", new Date());
         req.setAttribute("name", "Directories");
         req.getRequestDispatcher("explorer.jsp").forward(req, resp);
     }
@@ -30,7 +33,7 @@ public class DirServlet extends HttpServlet {
         StringBuilder attrFolders = new StringBuilder();
 
         if (path.contains("/"))
-            addDirectory(attrFolders, path.substring(0, path.lastIndexOf('/')), "return");
+            addDirectory(attrFolders, path.substring(0, path.lastIndexOf('/')), "return", 0, 0);
 
         File[] files = new File(path).listFiles();
 
@@ -39,10 +42,10 @@ public class DirServlet extends HttpServlet {
 
         for (File file : files) {
             if (file.isDirectory())
-                addDirectory(attrFolders, path + "/" + file.getName(), file.getName());
+                addDirectory(attrFolders, path + "/" + file.getName(), file.getName(), file.lastModified(), file.length());
 
             else
-                addFile(attrFiles, file.getName());
+                addFile(attrFiles, file.getName(), file.lastModified(), file.length(), path);
         }
 
         req.setAttribute("folders", attrFolders);
@@ -50,17 +53,25 @@ public class DirServlet extends HttpServlet {
     }
 
 
-    private void addDirectory(StringBuilder attrFiles, String path, String text) {
-        attrFiles.append("<li><a href=\"?path=")
-                .append(path)
-                .append("\">")
-                .append(text)
-                .append("</a></li>");
+    private void addDirectory(StringBuilder attrFiles, String path, String text, long date, long length) {
+        attrFiles.append("<tr><td><a href=\"?path=")
+            .append(path)
+            .append("\">")
+            .append(text)
+            .append("</a></td><td>")
+            .append(length)
+            .append("</td><td>")
+            .append(new SimpleDateFormat("MM.dd.yyyy HH:mm:ss").format(new Date(date)))
+            .append("</td>");
     }
 
-    private void addFile(StringBuilder attrFiles, String text) {
-        attrFiles.append("<li><a>")
+    private void addFile(StringBuilder attrFiles, String text, long date, long length, String path) {
+        attrFiles.append("<tr><td><a href=\"" + path + text + "\" download>")
                 .append(text)
-                .append("</a></li>");
+                .append("</a></td><td>")
+                .append(length)
+                .append("</td><td>")
+                .append(new SimpleDateFormat("MM.dd.yyyy HH:mm:ss").format(new Date(date)))
+                .append("</td>");
     }
 }
