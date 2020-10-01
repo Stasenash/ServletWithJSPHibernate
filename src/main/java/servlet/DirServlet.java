@@ -5,8 +5,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -20,12 +21,37 @@ public class DirServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String path = req.getParameter("path");
+        path = path == null ? defaultFolder : path;
 
-        printDirectory(req, path == null ? defaultFolder : path);
 
-        req.setAttribute("now", new Date());
-        req.setAttribute("name", "Directories");
-        req.getRequestDispatcher("explorer.jsp").forward(req, resp);
+        Path spath = Paths.get(path);
+        File file = spath.toFile();
+
+        if (file.isFile()) {
+            resp.setHeader("Content-Type", "application/octet-stream");
+            resp.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", file.getName()));
+
+            FileInputStream inStream = new FileInputStream(file);
+            OutputStream outStream = resp.getOutputStream();
+
+            byte[] buffer = new byte[4096];
+            int bytesRead = -1;
+
+            while ((bytesRead = inStream.read(buffer)) != -1) {
+                outStream.write(buffer, 0, bytesRead);
+            }
+
+            inStream.close();
+            outStream.close();
+        }
+
+        else {
+            printDirectory(req, path == null ? defaultFolder : path);
+
+            req.setAttribute("now", new Date());
+            req.setAttribute("name", "Directories");
+            req.getRequestDispatcher("explorer.jsp").forward(req, resp);
+        }
     }
 
     private void printDirectory(HttpServletRequest req, String path) {
@@ -37,7 +63,7 @@ public class DirServlet extends HttpServlet {
 
         File[] files = new File(path).listFiles();
 
-        if(files == null || files.length == 0)
+        if (files == null || files.length == 0)
             return;
 
         for (File file : files) {
@@ -55,23 +81,27 @@ public class DirServlet extends HttpServlet {
 
     private void addDirectory(StringBuilder attrFiles, String path, String text, long date, long length) {
         attrFiles.append("<tr><td><img src=\"https://icons.iconarchive.com/icons/hopstarter/sleek-xp-basic/16/Folder-icon.png\"><a href=\"?path=")
-            .append(path)
-            .append("\">")
-            .append(text)
-            .append("</a></td><td>")
-            .append(length + " Bytes")
-            .append("</td><td>")
-            .append(new SimpleDateFormat("MM.dd.yyyy HH:mm:ss").format(new Date(date)))
-            .append("</td>");
+                .append(path)
+                .append("\">")
+                .append(text)
+                .append("</a></td><td>")
+                .append(length)
+                .append(" Bytes")
+                .append("</td><td>")
+                .append(new SimpleDateFormat("MM.dd.yyyy HH:mm:ss").format(new Date(date)))
+                .append("</td>");
     }
 
     private void addFile(StringBuilder attrFiles, String text, long date, long length, String path) {
-        attrFiles.append("<tr><td><a href=\"" + path + text + "\" download>")
-            .append(text)
-            .append("</a></td><td>")
-            .append(length + " Bytes")
-            .append("</td><td>")
-            .append(new SimpleDateFormat("MM.dd.yyyy HH:mm:ss").format(new Date(date)))
-            .append("</td>");
+        attrFiles.append("<tr><td><a href=\"?path=")
+                .append(path + "/" + text)
+                .append("\">")
+                .append(text)
+                .append("</a></td><td>")
+                .append(length)
+                .append(" Bytes")
+                .append("</td><td>")
+                .append(new SimpleDateFormat("MM.dd.yyyy HH:mm:ss").format(new Date(date)))
+                .append("</td></tr>");
     }
 }
