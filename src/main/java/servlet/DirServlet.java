@@ -54,12 +54,12 @@ public class DirServlet extends HttpServlet {
 
 
     private void addDirectory(StringBuilder attrFiles, String path, String text, long date, long length) {
-        attrFiles.append("<tr><td><a href=\"?path=")
+        attrFiles.append("<tr><td><img src=\"https://icons.iconarchive.com/icons/hopstarter/sleek-xp-basic/16/Folder-icon.png\"><a href=\"?path=")
             .append(path)
             .append("\">")
             .append(text)
             .append("</a></td><td>")
-            .append(length)
+            .append(length + " Bytes")
             .append("</td><td>")
             .append(new SimpleDateFormat("MM.dd.yyyy HH:mm:ss").format(new Date(date)))
             .append("</td>");
@@ -67,11 +67,11 @@ public class DirServlet extends HttpServlet {
 
     private void addFile(StringBuilder attrFiles, String text, long date, long length, String path) {
         attrFiles.append("<tr><td><a href=\"" + path + text + "\" download>")
-                .append(text)
-                .append("</a></td><td>")
-                .append(length)
-                .append("</td><td>")
-                .append(new SimpleDateFormat("MM.dd.yyyy HH:mm:ss").format(new Date(date)))
-                .append("</td>");
+            .append(text)
+            .append("</a></td><td>")
+            .append(length + " Bytes")
+            .append("</td><td>")
+            .append(new SimpleDateFormat("MM.dd.yyyy HH:mm:ss").format(new Date(date)))
+            .append("</td>");
     }
 }

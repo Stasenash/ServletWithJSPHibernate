@@ -10,7 +10,10 @@
         table{
             border: 4px double #333;
         }
-
+        img {
+            position: relative;
+            top: 3px;
+        }
     </style>
     <title>Directories</title>
 </head>
