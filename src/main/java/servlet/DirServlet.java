@@ -43,9 +43,7 @@ public class DirServlet extends HttpServlet {
 
             inStream.close();
             outStream.close();
-        }
-
-        else {
+        } else {
             printDirectory(req, path == null ? defaultFolder : path);
 
             req.setAttribute("now", new Date());
@@ -59,7 +57,7 @@ public class DirServlet extends HttpServlet {
         StringBuilder attrFolders = new StringBuilder();
 
         if (path.contains("/"))
-            addDirectory(attrFolders, path.substring(0, path.lastIndexOf('/')), "return", 0, 0);
+            addFile(true, attrFolders, path.substring(0, path.lastIndexOf('/')), "return", 0, 0);
 
         File[] files = new File(path).listFiles();
 
@@ -68,10 +66,10 @@ public class DirServlet extends HttpServlet {
 
         for (File file : files) {
             if (file.isDirectory())
-                addDirectory(attrFolders, path + "/" + file.getName(), file.getName(), file.lastModified(), file.length());
+                addFile(true, attrFolders, path + "/" + file.getName(), file.getName(), file.lastModified(), file.length());
 
             else
-                addFile(attrFiles, file.getName(), file.lastModified(), file.length(), path);
+                addFile(false, attrFiles, path, file.getName(), file.lastModified(), file.length());
         }
 
         req.setAttribute("folders", attrFolders);
@@ -79,23 +77,16 @@ public class DirServlet extends HttpServlet {
     }
 
 
-    private void addDirectory(StringBuilder attrFiles, String path, String text, long date, long length) {
-        attrFiles.append("<tr><td><img src=\"https://icons.iconarchive.com/icons/hopstarter/sleek-xp-basic/16/Folder-icon.png\"><a href=\"?path=")
-                .append(path)
-                .append("\">")
-                .append(text)
-                .append("</a></td><td>")
-                .append(length)
-                .append(" Bytes")
-                .append("</td><td>")
-                .append(new SimpleDateFormat("MM.dd.yyyy HH:mm:ss").format(new Date(date)))
-                .append("</td>");
-    }
+    private void addFile(boolean isDir, StringBuilder attrFiles, String path, String text, long date, long length) {
+        if (isDir) {
+            attrFiles.append("<tr><td><img src=\"https://icons.iconarchive.com/icons/hopstarter/sleek-xp-basic/16/Folder-icon.png\"><a href=\"?path=")
+                    .append(path);
+        } else {
+            attrFiles.append("<tr><td><a href=\"?path=")
+                    .append(path + "/" + text);
+        }
 
-    private void addFile(StringBuilder attrFiles, String text, long date, long length, String path) {
-        attrFiles.append("<tr><td><a href=\"?path=")
-                .append(path + "/" + text)
-                .append("\">")
+        attrFiles.append("\">")
                 .append(text)
                 .append("</a></td><td>")
                 .append(length)
