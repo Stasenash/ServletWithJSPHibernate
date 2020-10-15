@@ -32,17 +32,41 @@ public class DirController extends HttpServlet {
         userPath += login;
 
         String path = req.getParameter("path");
+        path = path == null ? userPath : path;
 
-        File file = new File(userPath);
-        if (!file.exists()) {
-            file.mkdirs();
+
+        Path spath = Paths.get(path);
+        File file = spath.toFile();
+
+
+        File dir = new File(userPath);
+        if (!dir.exists()) {
+            dir.mkdirs();
         }
 
-        printDirectory(req, (path == null || !path.contains(userPath + login)) ? (userPath) : path, login);
+        if (file.isFile()) {
+            resp.setHeader("Content-Type", "application/octet-stream");
+            resp.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", file.getName()));
 
-        req.setAttribute("name", userPath);
+            FileInputStream inStream = new FileInputStream(file);
+            OutputStream outStream = resp.getOutputStream();
 
-        req.getRequestDispatcher("explorer.jsp").forward(req, resp);
+            byte[] buffer = new byte[4096];
+            int bytesRead = -1;
+
+            while ((bytesRead = inStream.read(buffer)) != -1) {
+                outStream.write(buffer, 0, bytesRead);
+            }
+
+            inStream.close();
+            outStream.close();
+        } else {
+            printDirectory(req, (path == null || !path.contains(userPath + login)) ? (userPath) : path, login);
+
+            req.setAttribute("name", userPath);
+            req.setAttribute("now", new Date());
+            req.getRequestDispatcher("explorer.jsp").forward(req, resp);
+        }
     }
 
     @Override
@@ -55,7 +79,7 @@ public class DirController extends HttpServlet {
         StringBuilder attrFiles = new StringBuilder();
         StringBuilder attrFolders = new StringBuilder();
         if (path.lastIndexOf('/') != path.indexOf('/') && !path.substring(path.lastIndexOf('/') + 1).equals(login))
-            addDirectory(attrFolders, path.substring(0, path.lastIndexOf('/')), "return");
+            addFile(true, attrFolders, path.substring(0, path.lastIndexOf('/')), "return", 0, 0);
 
         File[] files = new File(path).listFiles();
         if (files == null || files.length == 0)
@@ -63,26 +87,30 @@ public class DirController extends HttpServlet {
 
         for (File file : files) {
             if (file.isDirectory())
-                addDirectory(attrFolders, path + "/" + file.getName(), file.getName());
+                addFile(true, attrFolders, path + "/" + file.getName(), file.getName(), file.lastModified(), file.length());
             else
-                addFile(attrFiles, file.getName());
+                addFile(false, attrFiles, path, file.getName(), file.lastModified(), file.length());
         }
         req.setAttribute("folders", attrFolders);
         req.setAttribute("files", attrFiles);
-        req.setAttribute("now", new Date());
     }
 
-    private void addDirectory(StringBuilder attrFiles, String path, String text) {
-        attrFiles.append("<li><a href=\"?path=")
-                .append(path)
-                .append("\">")
-                .append(text)
-                .append("</a></li>");
-    }
+    private void addFile(boolean isDir, StringBuilder attrFiles, String path, String text, long date, long length) {
+        if (isDir) {
+            attrFiles.append("<tr><td><img src=\"https://icons.iconarchive.com/icons/hopstarter/sleek-xp-basic/16/Folder-icon.png\"><a href=\"?path=")
+                    .append(path);
+        } else {
+            attrFiles.append("<tr><td><a href=\"?path=")
+                    .append(path + "/" + text);
+        }
 
-    private void addFile(StringBuilder attrFiles, String text) {
-        attrFiles.append("<li><a>")
+        attrFiles.append("\">")
                 .append(text)
-                .append("</a></li>");
+                .append("</a></td><td>")
+                .append(length)
+                .append(" Bytes")
+                .append("</td><td>")
+                .append(new SimpleDateFormat("MM.dd.yyyy HH:mm:ss").format(new Date(date)))
+                .append("</td></tr>");
     }
 }
