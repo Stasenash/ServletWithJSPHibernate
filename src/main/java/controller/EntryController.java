@@ -15,7 +15,7 @@ import java.io.IOException;
 public class EntryController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        UserProfile userProfile = AccountService.getInstance().getUserBySessionId("sessionID-" + req.getRemoteAddr());
+        UserProfile userProfile = AccountService.getInstance().getUserBySessionId(req.getSession().getId());
         if (userProfile != null) {
             resp.sendRedirect("/ServletWithJSP_war/explorer");
             return;
@@ -32,7 +32,7 @@ public class EntryController extends HttpServlet {
             req.getRequestDispatcher("registration.jsp").forward(req, resp);
             return;
         }
-        AccountService.getInstance().addSession("sessionID-" + req.getRemoteAddr(), userProfile);
+        AccountService.getInstance().addSession(req.getSession().getId(), userProfile);
         resp.sendRedirect("/ServletWithJSP_war/explorer");
     }
 }

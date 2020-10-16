@@ -23,7 +23,7 @@ public class DirController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        UserProfile userProfile = AccountService.getInstance().getUserBySessionId("sessionID-" + req.getRemoteAddr());
+        UserProfile userProfile = AccountService.getInstance().getUserBySessionId( req.getSession().getId());
         String login = userProfile.getLogin();
 
         req.setAttribute("name", "Hi, " + login);
@@ -71,7 +71,7 @@ public class DirController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        AccountService.getInstance().deleteSession("sessionID-" + req.getRemoteAddr());
+        AccountService.getInstance().deleteSession( req.getSession().getId());
         resp.sendRedirect("/ServletWithJSP_war/");
     }
 

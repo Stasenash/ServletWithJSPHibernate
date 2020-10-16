@@ -13,6 +13,7 @@ public class AccountService {
         sessionIdToProfile = new HashMap<String, UserProfile>();
 
         loginToProfile.put("Stasenash", new UserProfile("Stasenash", "39900078999Tt", "staslisenash@gmail.com"));
+        loginToProfile.put("11", new UserProfile("11", "11", "1111@11"));
     }
 
     public static AccountService getInstance() {

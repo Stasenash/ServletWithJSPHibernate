@@ -16,20 +16,20 @@ public class RegistrationController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String login = req.getParameter("login");
-        String firstPassword = req.getParameter("pass1");
-        String secondPassword = req.getParameter("pass2");
+        String password = req.getParameter("pass1");
+        String passwordConfirm = req.getParameter("pass2");
         String email = req.getParameter("email");
 
         clearErrors(req);
 
-        if (!checkErrors(req, login, firstPassword, secondPassword, email)) {
-            UserProfile userProfile = new UserProfile(login, firstPassword, email);
+        if (!checkErrors(req, login, password, passwordConfirm, email)) {
+            UserProfile userProfile = new UserProfile(login, password, email);
             AccountService.getInstance().addNewUser(userProfile);
             req.getRequestDispatcher("index.jsp").forward(req, resp);
         } else {
             req.setAttribute("login", login);
-            req.setAttribute("pass1", firstPassword);
-            req.setAttribute("pass2", secondPassword);
+            req.setAttribute("pass1", password);
+            req.setAttribute("pass2", passwordConfirm);
             req.setAttribute("email", email);
             req.getRequestDispatcher("registration.jsp").forward(req, resp);
         }
