@@ -1,6 +1,5 @@
 package controller;
 
-
 import dbService.DBException;
 import dbService.DBService;
 import dbService.data.UserProfile;
@@ -32,21 +31,21 @@ public class EntryController extends HttpServlet {
         String login = req.getParameter("login");
         String password = req.getParameter("pass");
 
-//        clearErrors(req);
+        clearErrors(req);
 
 
-//        boolean errorStatus = false;
-//        try {
-//            errorStatus = checkErrors(req, login, password);
-//        } catch (DBException e) {
-//            e.printStackTrace();
-//        }
+        boolean errorStatus = false;
+        try {
+            errorStatus = checkErrors(req, login, password);
+        } catch (DBException e) {
+            e.printStackTrace();
+        }
 
-//        if (errorStatus) {
-//            req.setAttribute("login", login);
-//            req.setAttribute("pass", password);
-//            req.getRequestDispatcher("index.jsp").forward(req, resp);
-//        } else {
+        if (errorStatus) {
+            req.setAttribute("login", login);
+            req.setAttribute("pass", password);
+            req.getRequestDispatcher("index.jsp").forward(req, resp);
+        } else {
         UserProfile userProfile = dbService.getUser(login);
         if (userProfile == null || !userProfile.getPassword().equals(password)) {
             req.getRequestDispatcher("registration.jsp").forward(req, resp);
@@ -54,27 +53,27 @@ public class EntryController extends HttpServlet {
         }
         SessionController.getInstance().addSession(req.getSession().getId(), userProfile);
         resp.sendRedirect("/ServletWithJSP_war/explorer");
-//        }
+        }
     }
 
-//    private boolean checkErrors(HttpServletRequest req, String login, String password) throws DBException {
-//
-//        if (login == null || login.equals("")) {
-//            req.setAttribute("loginErr", "Поле не заполнено");
-//        } else if (password == null || password.equals("")) {
-//            req.setAttribute("passErr", "Поле не заполнено");
-//        }
-////        else if (dbService.getUser(login) == null) {
-////            req.setAttribute("loginErr", "Аккаунта с таким логином не существует");
-////        }
-//        else if (!dbService.getUser(login).getPassword().equals(password)) {
-//            req.setAttribute("passErr", "Неверный пароль");
-//        } else return false;
-//        return true;
-//    }
+    private boolean checkErrors(HttpServletRequest req, String login, String password) throws DBException {
 
-//    private void clearErrors(HttpServletRequest req) {
-//        req.setAttribute("loginErr", "");
-//        req.setAttribute("passErr", "");
-//    }
+        if (login == null || login.equals("")) {
+            req.setAttribute("loginErr", "Поле не заполнено");
+        } else if (password == null || password.equals("")) {
+            req.setAttribute("passErr", "Поле не заполнено");
+        }
+        else if (dbService.getUser(login) == null) {
+            req.setAttribute("loginErr", "Аккаунта с таким логином не существует");
+        }
+        else if (!dbService.getUser(login).getPassword().equals(password)) {
+            req.setAttribute("passErr", "Неверный пароль");
+        } else return false;
+        return true;
+    }
+
+    private void clearErrors(HttpServletRequest req) {
+        req.setAttribute("loginErr", "");
+        req.setAttribute("passErr", "");
+    }
 }

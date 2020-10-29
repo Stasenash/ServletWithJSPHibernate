@@ -1,7 +1,6 @@
 package dbService.data;
 import javax.persistence.*;
 
-//TODO: serializable
 @Entity
 @Table(name="users_profiles")
 public class UserProfile {

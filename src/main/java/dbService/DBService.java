@@ -3,7 +3,6 @@ package dbService;
 import dbService.dao.UserDAO;
 import dbService.data.UserProfile;
 
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -11,15 +10,12 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 
-import java.sql.SQLException;
-
 public class DBService {
     private static final String hibernate_show_sql = "true";
     private static final String hibernate_hbm2ddl_auto = "update";
 
     private static SessionFactory sessionFactory = null;
 
-    //TODO: static
     public DBService() {
         Configuration configuration = getConfiguration();
         sessionFactory = createSessionFactory(configuration);
@@ -27,8 +23,6 @@ public class DBService {
 
     public UserProfile getUser(String login){
         Session session = sessionFactory.openSession();
-        //UserDAO dao = new UserDAO(session);
-        //UserProfile dataSet = dao.get(login);
         UserProfile dataSet = new UserDAO(session).get(login);
         session.close();
         return dataSet;
