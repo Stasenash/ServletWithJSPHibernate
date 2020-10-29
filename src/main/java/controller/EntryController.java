@@ -3,7 +3,7 @@ package controller;
 
 import dbService.DBException;
 import dbService.DBService;
-import dbService.dataSets.UsersDataSet;
+import dbService.data.UserProfile;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -19,7 +19,7 @@ public class EntryController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        UsersDataSet userProfile = SessionController.getInstance().getUserBySessionId(req.getSession().getId());
+        UserProfile userProfile = SessionController.getInstance().getUserBySessionId(req.getSession().getId());
         if (userProfile != null) {
             resp.sendRedirect("/ServletWithJSP_war/explorer");
             return;
@@ -32,48 +32,49 @@ public class EntryController extends HttpServlet {
         String login = req.getParameter("login");
         String password = req.getParameter("pass");
 
-        clearErrors(req);
+//        clearErrors(req);
 
 
-        boolean errorStatus = false;
-        try {
-            errorStatus = checkErrors(req, login, password);
-        } catch (DBException e) {
-            e.printStackTrace();
+//        boolean errorStatus = false;
+//        try {
+//            errorStatus = checkErrors(req, login, password);
+//        } catch (DBException e) {
+//            e.printStackTrace();
+//        }
+
+//        if (errorStatus) {
+//            req.setAttribute("login", login);
+//            req.setAttribute("pass", password);
+//            req.getRequestDispatcher("index.jsp").forward(req, resp);
+//        } else {
+        UserProfile userProfile = dbService.getUser(login);
+        if (userProfile == null || !userProfile.getPassword().equals(password)) {
+            req.getRequestDispatcher("registration.jsp").forward(req, resp);
+            return;
         }
-
-        if (errorStatus) {
-            req.setAttribute("login", login);
-            req.setAttribute("pass", password);
-            req.getRequestDispatcher("index.jsp").forward(req, resp);
-        } else {
-            UsersDataSet userProfile = null;
-            try {
-                userProfile = dbService.getUser(login);
-            } catch (DBException e) {
-                e.printStackTrace();
-            }
-            SessionController.getInstance().addSession(req.getSession().getId(), userProfile);
-            resp.sendRedirect("/ServletWithJSP_war/explorer");
-        }
+        SessionController.getInstance().addSession(req.getSession().getId(), userProfile);
+        resp.sendRedirect("/ServletWithJSP_war/explorer");
+//        }
     }
 
-    private boolean checkErrors(HttpServletRequest req, String login, String password) throws DBException {
+//    private boolean checkErrors(HttpServletRequest req, String login, String password) throws DBException {
+//
+//        if (login == null || login.equals("")) {
+//            req.setAttribute("loginErr", "Поле не заполнено");
+//        } else if (password == null || password.equals("")) {
+//            req.setAttribute("passErr", "Поле не заполнено");
+//        }
+////        else if (dbService.getUser(login) == null) {
+////            req.setAttribute("loginErr", "Аккаунта с таким логином не существует");
+////        }
+//        else if (!dbService.getUser(login).getPassword().equals(password)) {
+//            req.setAttribute("passErr", "Неверный пароль");
+//        } else return false;
+//        return true;
+//    }
 
-        if (login == null || login.equals("")) {
-            req.setAttribute("loginErr", "Поле не заполнено");
-        } else if (password == null || password.equals("")) {
-            req.setAttribute("passErr", "Поле не заполнено");
-        } else if (!dbService.checkUserExists(login)) {
-            req.setAttribute("loginErr", "Аккаунта с таким логином не существует");
-        } else if (!dbService.getUser(login).getPassword().equals(password)) {
-            req.setAttribute("passErr", "Неверный пароль");
-        } else return false;
-        return true;
-    }
-
-    private void clearErrors(HttpServletRequest req) {
-        req.setAttribute("loginErr", "");
-        req.setAttribute("passErr", "");
-    }
+//    private void clearErrors(HttpServletRequest req) {
+//        req.setAttribute("loginErr", "");
+//        req.setAttribute("passErr", "");
+//    }
 }

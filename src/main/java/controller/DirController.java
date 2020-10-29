@@ -1,6 +1,6 @@
 package controller;
 
-import dbService.dataSets.UsersDataSet;
+import dbService.data.UserProfile;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -22,7 +22,7 @@ public class DirController extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        UsersDataSet userProfile = SessionController.getInstance().getUserBySessionId(req.getSession().getId());
+        UserProfile userProfile = SessionController.getInstance().getUserBySessionId(req.getSession().getId());
         String login = userProfile.getLogin();
 
         req.setAttribute("name", "Hi, " + login);
@@ -69,7 +69,7 @@ public class DirController extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         SessionController.getInstance().deleteSession(req.getSession().getId());
         resp.sendRedirect("/ServletWithJSP_war/");
     }
